@@ -7,7 +7,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @ComponentScan(basePackages="com.building.prices.*")
-@MapperScan(value = "com.building.prices.mapper")
+@MapperScan("com.building.prices.mapper")
 public class PricesApplication {
     public static void main(String[] args) {
         SpringApplication.run(PricesApplication.class, args);
