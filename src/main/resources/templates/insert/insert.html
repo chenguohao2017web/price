@@ -1,0 +1,177 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="renderer" content="webkit"/>
+    <meta charset="utf-8" name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script crossorigin="anonymous" integrity="sha512-WNLxfP/8cVYL9sj8Jnp6et0BkubLP31jhTG9vhL/F5uEZmg5wEzKoXp1kJslzPQWwPT1eyMiSxlKCgzHLOTOTQ==" src="https://lib.baomitu.com/jquery/3.5.1/jquery.js"></script>
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="../common/vue.js"></script>
+    <script src="../common/axios.js"></script>
+    <link rel="stylesheet" href="../css/index.css"/>
+    <title>首页</title>
+</head>
+<body>
+    <div id="app" class="container-fluid" style="position: relative">
+
+        <button @click="handleBack" type="button" class="btn btn-primary" style="position: absolute;top:10px;right:10px;">返回</button>
+
+        <div class="page-header">
+            <h4>批量注入</h4>
+        </div>
+
+        <div class="form-inline">
+            <div class="form-group">
+                <label for="yearInput">年份</label>
+                <input  type="text" v-model="year" class="form-control" id="yearInput" placeholder="年份" @keyup.13="init">
+            </div>
+            <div class="form-group">
+                <label for="monthInput">月份</label>
+                <input  type="text" v-model="month" class="form-control" id="monthInput" placeholder="月份" @keyup.13="init">
+            </div>
+            <button class="btn btn-success" @click="init">刷新</button>
+        </div>
+
+        <ul class="list-group" style="margin-top:50px;">
+            <li v-for="item of list" :class="['list-group-item', {'list-group-item-success': item.electric && item.water}]">
+                <div style="text-align: center;font-size:20px;font-weight: bold">{{item.roomNum}}</div>
+                <form class="form-inline" style="text-align: center">
+                    <div class="form-group">
+                        <label for="exampleInputName2">电</label>
+                        <input type="text" v-model="item.electric" class="form-control" id="exampleInputName2" >
+                    </div>
+                    <div class="form-group">
+                        <label for="exampleInputEmail2">水</label>
+                        <input type="text" v-model="item.water" class="form-control" id="exampleInputEmail2">
+                    </div>
+                </form>
+            </li>
+        </ul>
+
+        <div class="loading" v-if="showLoading">
+            <div class="loading-text">请稍后..</div>
+        </div>
+
+
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">提交{{year}}年{{month}}月的数据</h4>
+                    </div>
+                    <div class="modal-body">
+                        确认提交？
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-primary" @click="commit">确认提交</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-primary btn-lg" @click="openDialog" v-if="list.length > 0">
+            提交
+        </button>
+        <button type="button" class="btn btn-primary btn-lg" v-else>
+            无需插入数据
+        </button>
+
+
+    </div>
+
+    <script>
+        $(() => {
+            new Vue({
+                el: '#app',
+                data(){
+                    return {
+                        list:[],
+                        year: "",
+                        month: "",
+                        showLoading: false
+                    }
+                },
+                mounted() {
+                    let params = JSON.parse(localStorage.getItem("params"))
+                    this.year = params.year
+                    this.month = params.month
+                    this.init()
+                },
+                methods: {
+                    handleBack() {
+                        window.history.back()
+                    },
+                    async init() {
+                        if(!this.year || !this.month) return
+                        const res = await axios.post("/getList",{
+                            year: this.year,
+                            month: this.month
+                        })
+
+                        let list = res.data.list
+                        let finishList = res.data.finishList
+
+                        //获取不需要注入的ids
+                        let ids = []
+                        if(finishList && finishList.length > 0 ) {
+                            finishList.forEach((item) => {
+                                ids.push(item.roomId)
+                            })
+                        }
+
+                        //筛选不需要进行计算的数组
+                        let calculateList = []
+                        if(ids.length > 0) {
+                            list.forEach((item) => {
+                                let id = item.id
+                                if(!ids.includes(id)) {
+                                    calculateList.push(item)
+                                }
+                            })
+                        } else {
+                            calculateList = list
+                        }
+                        console.log(calculateList)
+                        this.list = calculateList
+                    },
+                    commit() {
+                        this.showLoading = true
+                        let data = {
+                            list: this.list,
+                            year: this.year,
+                            month: this.month
+                        }
+                        axios.post("/insertDetails",data).then(() => {
+                            this.showLoading = false
+                            alert("操作成功")
+                            window.location.href = "/"
+                        })
+
+                    },
+                    openDialog() {
+                        let canCommit = true
+                        this.list.forEach((item) => {
+                            if(!item.electric || !item.water) {
+                                canCommit = false
+                                return
+                            }
+                        })
+                        if(canCommit) {
+                            $('#myModal').modal('toggle')
+                        }
+
+                    }
+
+                }
+            })
+        })
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="renderer" content="webkit"/>
+    <meta charset="utf-8" name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script crossorigin="anonymous" integrity="sha512-WNLxfP/8cVYL9sj8Jnp6et0BkubLP31jhTG9vhL/F5uEZmg5wEzKoXp1kJslzPQWwPT1eyMiSxlKCgzHLOTOTQ==" src="https://lib.baomitu.com/jquery/3.5.1/jquery.js"></script>
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="../common/vue.js"></script>
+    <script src="../common/axios.js"></script>
+    <link rel="stylesheet" href="../css/index.css" />
+    <title>detail</title>
+</head>
+<body>
+    <div id="app" class="container-fluid" style="position: relative">
+
+        <button @click="handleBack" type="button" class="btn btn-primary" style="position: absolute;top:10px;right:10px;">返回</button>
+        <div class="page-header">
+            <h4>新增数据</h4>
+        </div>
+
+
+        <div>
+            <div class="form-inline">
+                <div class="form-group">
+                    <label for="yearInput">年份</label>
+                    <input type="text" v-model="year" class="form-control" id="yearInput" placeholder="年份">
+                </div>
+                <div class="form-group">
+                    <label for="monthInput">月份</label>
+                    <input type="text" v-model="month" class="form-control" id="monthInput" placeholder="月份">
+                </div>
+            </div>
+            <div style="height:10px"></div>
+
+            <form class="form-inline">
+                <div class="form-group">
+                    <label for="roomNum">房间号</label>
+                    <input type="text" v-model="roomNum" class="form-control" id="roomNum">
+                </div>
+                <div class="form-group">
+                    <label for="price">房租</label>
+                    <input type="text" v-model="price" class="form-control" id="price">
+                </div>
+            </form>
+
+            <div style="height:10px"></div>
+
+            <form class="form-inline">
+                <div class="form-group" >
+                    <label for="currentEle">起始电费</label>
+                    <input type="text" v-model="currentElectric" class="form-control" id="currentEle">
+                </div>
+                <div class="form-group">
+                    <label for="currentWater">起始水费</label>
+                    <input type="text" @keyup.13="handleCommit" v-model="currentWater" class="form-control" id="currentWater">
+                </div>
+            </form>
+
+            <div style="height:10px"></div>
+
+
+            <button  type="button" class="btn btn-primary" @click="handleCommit">提交</button>
+        </div>
+
+        <div class="loading" v-if="showLoading">
+            <div class="loading-text">请稍后..</div>
+        </div>
+    </div>
+
+    <script>
+        $(() => {
+            new Vue({
+                el: '#app',
+                data(){
+                    return {
+                        showLoading: false,
+                        year: "",
+                        month: "",
+                        currentElectric:"",
+                        currentWater:"",
+                        roomNum:"",
+                        price:""
+                    }
+                },
+                mounted() {
+                    let params = JSON.parse(localStorage.getItem("params"))
+                    this.year = params.year
+                    this.month = params.month
+                },
+                methods: {
+                    handleBack() {
+                        window.history.back()
+                    },
+                    handleCommit() {
+                        if(!this.year || !this.month || !this.currentWater || !this.currentElectric || !this.roomNum || !this.price) return
+                        this.showLoading = true
+                        axios.post("/addRoom", {
+                            year: this.year,
+                            month: this.month,
+                            electric:this.currentElectric,
+                            water:this.currentWater,
+                            roomNum:this.roomNum,
+                            price:this.price
+                        }).then(res => {
+                            this.showLoading = false
+                            alert("操作成功")
+                            window.location.href = "/"
+                        })
+                    }
+                }
+            })
+        })
+
+    </script>
+</body>
+</html>

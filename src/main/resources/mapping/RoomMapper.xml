@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.building.prices.mapper.RoomMapper">
+
+    <resultMap id="roomMap" type="com.building.prices.entity.Room" >
+        <id column="id" property="id"></id>
+        <result column="room_num" property="roomNum"></result>
+        <result column="price" property="price"></result>
+        <result column="start_time" property="startTime"></result>
+
+        <association property="detail" javaType="com.building.prices.entity.Detail">
+            <id property="id" column="id" />
+            <result column="room_id" property="roomId"></result>
+            <result column="total_price" property="totalPrice" />
+            <result column="water" property="water"></result>
+            <result column="electric" property="electric"></result>
+            <result column="month" property="month"></result>
+            <result column="year" property="year"></result>
+        </association>
+
+    </resultMap>
+
+    <select id="getList" resultMap="roomMap" >
+        select r.id, r.room_num, r.price, r.start_time,
+        d.total_price,d.electric, d.water, d.month, d.year, d.room_id
+         from room r
+         inner join detail d
+         where r.id=d.room_id
+         and d.year = #{year}
+         and d.month = #{month}
+    </select>
+
+<!--    根据id查询room-->
+    <select id="getRoomById" resultMap="roomMap" >
+        select id, room_num, price, start_time
+         from room
+         where id = #{id}
+    </select>
+
+<!--    根据年月id获取单个-->
+    <select id="getDetailById" resultMap="roomMap" >
+        select r.id, r.room_num, r.price, r.start_time,
+        d.total_price,d.electric, d.water, d.month, d.year, d.room_id
+         from room r
+         inner join detail d
+         where r.id=d.room_id
+         and d.year = #{year}
+         and d.month = #{month}
+         and r.id = #{id}
+    </select>
+
+<!--    根据roomNum查找room对象-->
+    <select id="findRoomByRoomNum" resultMap="roomMap" >
+        select r.id, r.room_num, r.price, r.start_time,d.total_price,d.electric, d.water
+         from room r
+         inner join detail d
+         where r.room_num = #{roomNum}
+         and d.year = #{year}
+         and d.month = #{month}
+    </select>
+
+<!--    获取所有用户列表-->
+
+    <resultMap id="roomM" type="com.building.prices.entity.Room" >
+        <id column="id" property="id"></id>
+        <result column="room_num" property="roomNum"></result>
+        <result column="price" property="price"></result>
+        <result column="start_time" property="startTime"></result>
+    </resultMap>
+
+    <select id="getRoomList" resultMap="roomM" >
+        select r.id, r.room_num, r.price, r.start_time
+         from room r
+    </select>
+
+<!--    新增room数据 返回主键-->
+
+    <insert id="insertRoom" parameterType="com.building.prices.entity.Room">
+        <selectKey resultType="int" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+
+        insert into room(room_num, price, start_time)
+        values
+        (
+           #{roomNum}, #{price}, #{startTime}
+        )
+    </insert>
+
+    <update id="update" parameterType="com.building.prices.entity.Room">
+        update room
+        <set>
+            <if test="price != null">price=#{price},</if>
+            <if test="startTime != null">start_time=#{startTime},</if>
+        </set>
+        where id=#{id}
+    </update>
+
+
+</mapper>

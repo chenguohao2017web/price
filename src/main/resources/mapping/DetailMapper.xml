@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.building.prices.mapper.DetailMapper">
+
+    <resultMap id="roomMap" type="com.building.prices.entity.Detail" >
+        <id property="id" column="id" />
+        <result column="room_id" property="roomId"></result>
+        <result column="total_price" property="totalPrice" />
+        <result column="water" property="water"></result>
+        <result column="electric" property="electric"></result>
+        <result column="month" property="month"></result>
+        <result column="year" property="year"></result>
+    </resultMap>
+
+    <select id="getList" resultMap="roomMap" >
+        select
+        d.total_price,d.electric, d.water, d.month, d.year, d.room_id
+         from detail d
+         where d.year = #{year}
+         and d.month = #{month}
+    </select>
+
+    <select id="getDetailByYearAndMonth" resultMap="roomMap" >
+        select
+        d.total_price,d.electric, d.water, d.month, d.year, d.room_id
+         from detail d
+         where d.year = #{year}
+         and d.month = #{month}
+         and d.room_id = #{roomId}
+    </select>
+
+    <insert id="addDetail" parameterType="com.building.prices.entity.Detail">
+        insert into detail(room_id, electric, water, `year`, `month`, total_price)
+        values(#{roomId}, #{electric}, #{water}, #{year}, #{month}, #{totalPrice})
+    </insert>
+
+
+    <update id="update" parameterType="com.building.prices.entity.Detail">
+        update detail
+        <set>
+            <if test="electric != null">electric=#{electric},</if>
+            <if test="water != null">water=#{water},</if>
+            <if test="totalPrice != null">total_price=#{totalPrice},</if>
+        </set>
+        where room_id=#{roomId}
+        and year = #{year}
+        and month = #{month}
+    </update>
+
+</mapper>

@@ -2,15 +2,28 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.building.prices.mapper.InfoMapper">
-    <!-- 结果集 -->
-    <resultMap id="infoMap" type="com.building.prices.entity.Info">
-        <id column="id" property="id" />
-        <result column="year" property="year" />
-        <result column="month" property="month" />
-        <result column="room_number" property="roomNumber" />
-        <result column="water" property="water" />
-        <result column="electric" property="electric" />
-        <result column="create_time" property="createTime" />
-        <result column="update_time" property="updateTime" />
+
+    <resultMap id="infoMap" type="com.building.prices.entity.Info" >
+        <id column="id" property="id"></id>
+        <result column="year" property="year"></result>
+        <result column="month" property="month"></result>
+        <result column="room_number" property="roomNumber"></result>
+        <result column="build_type" property="buildType"></result>
+        <result column="electric" property="electric"></result>
+        <result column="create_time" property="createTime"></result>
+        <result column="update_time" property="updateTime"></result>
+        <result column="room_price" property="roomPrice"></result>
     </resultMap>
+
+    <select id="selectOneById" resultMap="infoMap" parameterType="integer" >
+        select * from info where id = #{id}
+    </select>
+
+    <select id="selectListByYearAndMonth" resultMap="infoMap" >
+        select * from info
+        where
+        year = #{requestYear}
+         and month = #{requestMonth}
+         order by month, build_type
+    </select>
 </mapper>

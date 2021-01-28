@@ -1,0 +1,140 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="renderer" content="webkit"/>
+    <meta charset="utf-8" name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1, user-scalable=no"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script crossorigin="anonymous" integrity="sha512-WNLxfP/8cVYL9sj8Jnp6et0BkubLP31jhTG9vhL/F5uEZmg5wEzKoXp1kJslzPQWwPT1eyMiSxlKCgzHLOTOTQ==" src="https://lib.baomitu.com/jquery/3.5.1/jquery.js"></script>
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="../common/vue.js"></script>
+    <script src="../common/axios.js"></script>
+    <link rel="stylesheet" href="../css/index.css" />
+    <title>detail</title>
+</head>
+<body>
+    <div id="app" class="container-fluid" style="position: relative">
+        <button @click="handleBack" type="button" class="btn btn-primary" style="position: absolute;top:10px;right:10px;">返回</button>
+        <div class="page-header">
+            <h4>详情页面</h4>
+        </div>
+
+        <div>
+            <form class="form-inline">
+                <div class="form-group" v-if="before">
+                    <label for="roomNum">房间号</label>
+                    <input type="text" v-model="before.roomNum" class="form-control" id="roomNum" disabled >
+                </div>
+                <div class="form-group" v-if="before">
+                    <label for="price">房租</label>
+                    <input type="text" v-model="before.price" class="form-control" id="price" disabled>
+                </div>
+            </form>
+
+            <div style="height:10px"></div>
+
+            <form class="form-inline" >
+                <div class="form-group" v-if="before">
+                    <label for="beforeEle">{{before.detail.year}}年{{before.detail.month}}月电费</label>
+                    <input type="text" v-model="before.detail.electric" class="form-control" id="beforeEle" disabled>
+                </div>
+                <div class="form-group" v-if="detail">
+                    <label for="detailEle">{{detail.detail.year}}年{{detail.detail.month}}月电费</label>
+                    <input type="text" v-model="detail.detail.electric" class="form-control" id="detailEle" disabled>
+                </div>
+                <div class="form-group" v-else>
+                    <label for="currentEle">当月电费</label>
+                    <input type="text" v-model="currentElectric" class="form-control" id="currentEle">
+                </div>
+            </form>
+
+            <div style="height:10px"></div>
+
+            <form class="form-inline">
+                <div class="form-group" v-if="before">
+                    <label for="beforeWater">{{before.detail.year}}年{{before.detail.month}}月水费</label>
+                    <input type="text" v-model="before.detail.water" class="form-control" id="beforeWater" disabled>
+                </div>
+                <div class="form-group" v-if="detail">
+                    <label for="detailWater">{{detail.detail.year}}年{{detail.detail.month}}月水费</label>
+                    <input type="text" v-model="detail.detail.water" class="form-control" id="detailWater" disabled>
+                </div>
+                <div class="form-group" v-else>
+                    <label for="currentWater">当月水费</label>
+                    <input type="text" v-model="currentWater" class="form-control" id="currentWater">
+                </div>
+            </form>
+
+            <div class="list-group" v-if="detail">
+                <button type="button" class="list-group-item active">统计：{{currentTotalPrice}}</button>
+            </div>
+
+            <button v-if="!detail" type="button" class="btn btn-primary" @click="handleCommit">提交</button>
+        </div>
+
+        <div class="loading" v-if="showLoading">
+            <div class="loading-text">请稍后..</div>
+        </div>
+    </div>
+
+    <script>
+        $(() => {
+            new Vue({
+                el: '#app',
+                data(){
+                    return {
+                        showLoading: false,
+                        detail: null,
+                        before: null,
+                        currentElectric:"",
+                        currentWater:"",
+                        currentTotalPrice: 0
+
+                    }
+                },
+                mounted() {
+                    this.init()
+                },
+                methods: {
+                    handleBack() {
+                        window.history.back()
+                    },
+                    async init() {
+                        this.showLoading = true
+                       //获取id
+                        let params = JSON.parse(localStorage.getItem("params"))
+                        const res = await axios.post("/getRoomDetail",params)
+                        this.showLoading = false
+                        this.detail = res.data.detail
+                        this.before = res.data.before
+
+                        this.currentTotalPrice = this.detail.detail.totalPrice
+                    },
+                    handleCommit() {
+                        if(this.currentElectric && this.currentWater) {
+                            this.showLoading = true
+                            let data = {
+                                year: this.before.detail.year,
+                                month: this.before.detail.month,
+                                electric: this.currentElectric,
+                                water: this.currentWater,
+                                roomId: this.before.detail.roomId
+                            }
+                            axios.post("/addDetail",data).then((res) => {
+                                this.showLoading = false
+                                alert("提交成功")
+                                window.location.href = "/"
+                            })
+
+                        }
+                    }
+                }
+            })
+        })
+
+    </script>
+</body>
+</html>
