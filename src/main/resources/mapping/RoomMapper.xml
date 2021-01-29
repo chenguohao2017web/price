@@ -54,7 +54,7 @@
     <select id="findRoomByRoomNum" resultMap="roomMap" >
         select r.id, r.room_num, r.price, r.start_time,d.total_price,d.electric, d.water
          from room r
-         inner join detail d
+         left join detail d on r.id = d.room_id
          where r.room_num = #{roomNum}
          and d.year = #{year}
          and d.month = #{month}
@@ -96,6 +96,7 @@
         </set>
         where id=#{id}
     </update>
+
 
 
 </mapper>

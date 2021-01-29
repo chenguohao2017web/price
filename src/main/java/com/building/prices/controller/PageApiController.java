@@ -15,8 +15,10 @@ public class PageApiController {
     @Autowired
     private RoomService roomService;
 
+
     @PostMapping("/addRoom")
     public JSONObject addRoom(@RequestBody Map<String, String> map) {
         return roomService.addRomm(map);
     }
+
 }

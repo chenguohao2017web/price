@@ -16,9 +16,8 @@
     <title>首页</title>
 </head>
 <body>
-    <div id="app" class="container-fluid" style="position:relative">
-        <button style="position:absolute;top:10px;right:100px;" type="button" class="btn btn-primary" @click="handerAdd">新增/修改</button>
-        <button style="position:absolute;top:10px;right:10px;" type="button" class="btn btn-primary" @click="handerInsert">批量注入</button>
+    <div id="app" class="container-fluid">
+
         <div class="page-header">
             <h4>列表</h4>
         </div>
@@ -33,11 +32,13 @@
                 <input @keyup.13="getList" type="text" v-model="month" class="form-control" id="monthInput" placeholder="月份">
             </div>
             <button class="btn btn-success" @click="getList">查询</button>
+            <button type="button" class="btn btn-success" @click="handerAdd">新增</button>
+            <button type="button" class="btn btn-success" @click="handerInsert">批量注入</button>
         </div>
 
         <ul class="list-group" style="margin-top:50px;">
-            <li v-for="item of list" :class="['list-group-item',{'list-group-item-danger' : !item.isFinish}, {'list-group-item-success' : item.isFinish}]"
-                style="font-size:20px;font-weight: bold;"
+            <li v-for="item of list" :class="['list-group-item',{'list-group-item-danger' : !item.isFinish}, {'list-group-item-info' : item.isFinish}]"
+                style="font-size:16px;font-weight: bold;"
                 @click="handleClick(item)"
             >
                 {{item.roomNum}}
@@ -108,6 +109,7 @@
                         this.list = res.data.list
                         let finishList = res.data.finishList
                         if(!finishList) return
+                        let checkListId = []
                         this.list.forEach((item, idx) => {
                             finishList.forEach((finishItem) => {
                                 let id = finishItem.roomId

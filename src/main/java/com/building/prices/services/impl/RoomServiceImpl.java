@@ -94,52 +94,21 @@ public class RoomServiceImpl implements RoomService {
 
         Integer year = Integer.valueOf(map.get("year"));
         Integer month = Integer.valueOf(map.get("month"));
-        Integer roomNum = Integer.valueOf(map.get("roomNum"));
-        Integer price = Integer.valueOf(map.get("price"));
+        String roomNum = map.get("roomNum");
+        Double price = Double.valueOf(map.get("price"));
         Double electric = Double.valueOf(map.get("electric").toString());
         Double water = Double.valueOf(map.get("water").toString());
 
         //需要先判断房间是否存在
         Room room = roomMapper.findRoomByRoomNum(roomNum, year, month);
         if(room != null) {
-            //已经存在room数据 更新数据
-            room.setPrice(Double.valueOf(price.toString()));
-            room.setStartTime(new Date());
-            roomMapper.update(room);
-
-            Detail updateDetail = new Detail();
-            updateDetail.setMonth(month);
-            updateDetail.setYear(year);
-            updateDetail.setElectric(electric);
-            updateDetail.setWater(water);
-            updateDetail.setRoomId(Integer.valueOf(room.getId()));
-
-            //判断当时查询出来的room是否totalPrice==0 如果是啧是修改新增的房间，否则需要重新计算total
-            Double totalPrice = room.getDetail().getTotalPrice();
-            if(!totalPrice.equals(0.0)) {
-                //计算最新价格
-                //查询上个月的Room对象
-                Integer beforeYear = year;
-                Integer beforeMonth = month;
-                if(month.equals(1)) {
-                    beforeMonth = 12;
-                    beforeYear -= 1;
-                } else {
-                    beforeMonth -=1;
-                }
-                Room beforeRoom = roomMapper.findRoomByRoomNum(roomNum, beforeYear, beforeMonth);
-                Double newTotalPrice = Common.calculatePrice(beforeRoom.getDetail().getWater(), water, beforeRoom.getDetail().getElectric(), electric, Double.valueOf(price.toString()));
-                updateDetail.setTotalPrice(newTotalPrice);
-            }
-
-            boolean b = detailMapper.update(updateDetail);
-            jsonObject.put("result", b);
+            jsonObject.put("result","fail");
             return jsonObject;
         } else {
             //添加房间数据
             Room addRoom = new Room();
             addRoom.setRoomNum(roomNum);
-            addRoom.setPrice(Double.valueOf(price.toString()));
+            addRoom.setPrice(price);
             addRoom.setStartTime(new Date());
             roomMapper.insertRoom(addRoom);
             Integer roomId = addRoom.getId();
@@ -156,4 +125,5 @@ public class RoomServiceImpl implements RoomService {
             return jsonObject;
         }
     }
+
 }

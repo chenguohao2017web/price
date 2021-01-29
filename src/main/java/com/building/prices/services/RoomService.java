@@ -16,4 +16,5 @@ public interface RoomService {
     JSONObject getDetailById(Integer year,Integer month,Integer id);
 
     JSONObject addRomm(Map<String, String> map);
+
 }

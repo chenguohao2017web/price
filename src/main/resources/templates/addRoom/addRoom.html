@@ -108,8 +108,12 @@
                             price:this.price
                         }).then(res => {
                             this.showLoading = false
-                            alert("操作成功")
-                            window.location.href = "/"
+                            if(res.data.result === 'fail') {
+                                alert("已存在房间号")
+                            }else {
+                                alert("新增成功")
+                                window.location.href = "/"
+                            }
                         })
                     }
                 }

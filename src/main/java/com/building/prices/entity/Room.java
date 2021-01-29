@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class Room {
     private Integer id;
-    private Integer roomNum;
+    private String roomNum;
     private Double price;
     private Date startTime;
     private Detail detail;
@@ -17,11 +17,11 @@ public class Room {
         this.id = id;
     }
 
-    public Integer getRoomNum() {
+    public String getRoomNum() {
         return roomNum;
     }
 
-    public void setRoomNum(Integer roomNum) {
+    public void setRoomNum(String roomNum) {
         this.roomNum = roomNum;
     }
 
