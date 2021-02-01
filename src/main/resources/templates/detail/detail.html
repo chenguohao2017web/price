@@ -19,65 +19,96 @@
     <div id="app" class="container-fluid" style="position: relative">
         <button @click="handleBack" type="button" class="btn btn-primary" style="position: absolute;top:10px;right:10px;">返回</button>
         <div class="page-header">
-            <h4>详情页面</h4>
+            <h4>详情</h4>
         </div>
 
-        <div>
-            <form class="form-inline">
-                <div class="form-group" v-if="before">
-                    <label for="roomNum">房间号</label>
-                    <input type="text" v-model="before.roomNum" class="form-control" id="roomNum" disabled >
-                </div>
-                <div class="form-group" v-if="before">
-                    <label for="price">房租</label>
-                    <input type="text" v-model="before.price" class="form-control" id="price" disabled>
-                </div>
-            </form>
-
-            <div style="height:10px"></div>
-
-            <form class="form-inline" >
-                <div class="form-group" v-if="before">
-                    <label for="beforeEle">{{before.detail.year}}年{{before.detail.month}}月电费</label>
-                    <input type="text" v-model="before.detail.electric" class="form-control" id="beforeEle" disabled>
-                </div>
-                <div class="form-group" v-if="detail">
-                    <label for="detailEle">{{detail.detail.year}}年{{detail.detail.month}}月电费</label>
-                    <input type="text" v-model="detail.detail.electric" class="form-control" id="detailEle" disabled>
-                </div>
-                <div class="form-group" v-else>
-                    <label for="currentEle">当月电费</label>
-                    <input type="text" v-model="currentElectric" class="form-control" id="currentEle">
-                </div>
-            </form>
-
-            <div style="height:10px"></div>
-
-            <form class="form-inline">
-                <div class="form-group" v-if="before">
-                    <label for="beforeWater">{{before.detail.year}}年{{before.detail.month}}月水费</label>
-                    <input type="text" v-model="before.detail.water" class="form-control" id="beforeWater" disabled>
-                </div>
-                <div class="form-group" v-if="detail">
-                    <label for="detailWater">{{detail.detail.year}}年{{detail.detail.month}}月水费</label>
-                    <input type="text" v-model="detail.detail.water" class="form-control" id="detailWater" disabled>
-                </div>
-                <div class="form-group" v-else>
-                    <label for="currentWater">当月水费</label>
-                    <input type="text" v-model="currentWater" class="form-control" id="currentWater">
-                </div>
-            </form>
-
-            <div class="list-group" v-if="detail">
-                <button type="button" class="list-group-item active">统计：{{currentTotalPrice}}</button>
+        <div class="form-inline">
+            <div class="form-group">
+                <label for="yearInput">年份</label>
+                <input @keyup.13="getDetail" type="text" v-model="year" class="form-control" id="yearInput" placeholder="年份">
             </div>
-
-            <button v-if="!detail" type="button" class="btn btn-primary" @click="handleCommit">提交</button>
+            <div class="form-group">
+                <label for="monthInput">月份</label>
+                <input @keyup.13="getDetail" type="text" v-model="month" class="form-control" id="monthInput" placeholder="月份">
+            </div>
+            <button type="button" class="btn btn-success" @click="getDetail" style="margin:10px 0;">查询</button>
         </div>
+
+        <form class="form-inline" v-if="origin">
+            <div class="form-group">
+                <label for="roomNum">房间名/编号</label>
+                <input type="text" v-model="origin.roomNum" class="form-control" id="roomNum" disabled>
+            </div>
+            <div class="form-group">
+                <label for="price">租金</label>
+                <input type="text" v-model="origin.price" class="form-control" id="price">
+            </div>
+        </form>
+
+        <div style="height:10px"></div>
+
+        <form class="form-inline" v-if="before">
+            <div class="form-group">
+                <label for="beforeEle">{{before.detail.year}}年{{before.detail.month}}月用电</label>
+                <input type="text" v-model="before.detail.electric" class="form-control" id="beforeEle" disabled>
+            </div>
+            <div class="form-group">
+                <label for="beforeWater">{{before.detail.year}}年{{before.detail.month}}月用水</label>
+                <input type="text" v-model="before.detail.water" class="form-control" id="beforeWater" disabled>
+            </div>
+        </form>
+        <div class="alert alert-danger" role="alert" v-else>没有查询到上个月数据</div>
+
+        <div style="height:10px"></div>
+
+        <form class="form-inline" v-if="current">
+            <div class="form-group">
+                <label for="curEle">{{current.detail.year}}年{{current.detail.month}}月头用电</label>
+                <input type="text" v-model="current.detail.electric" class="form-control" id="curEle">
+            </div>
+            <div class="form-group">
+                <label for="curWater">{{current.detail.year}}年{{current.detail.month}}月头用水</label>
+                <input type="text" v-model="current.detail.water" class="form-control" id="curWater">
+            </div>
+        </form>
+
+        <form class="form-inline" v-else>
+            <div class="form-group">
+                <label for="electric">{{year}}年{{month}}月头用电</label>
+                <input type="text" v-model="electric" class="form-control" id="electric" >
+            </div>
+            <div class="form-group">
+                <label for="water">{{year}}年{{month}}月头用水</label>
+                <input type="text" v-model="water" class="form-control" id="water">
+            </div>
+        </form>
+
+        <div class="alert alert-success" style="margin-top:10px;" role="alert" v-if="showTotal">统计：{{currentTotalPrice}}</div>
+
+        <button type="button" class="btn btn-primary" @click="update" v-if="current">更新</button>
+        <button type="button" class="btn btn-primary" @click="add" v-if="!current">写入</button>
 
         <div class="loading" v-if="showLoading">
             <div class="loading-text">请稍后..</div>
         </div>
+
+
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="exampleModalLabel">温馨提醒</h4>
+                </div>
+                <div class="modal-body">
+                   操作成功
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
     </div>
 
     <script>
@@ -87,48 +118,133 @@
                 data(){
                     return {
                         showLoading: false,
-                        detail: null,
+                        current: null,
                         before: null,
-                        currentElectric:"",
-                        currentWater:"",
-                        currentTotalPrice: 0
+                        origin: null,
+                        month:"",
+                        year:"",
+                        electric:"",
+                        water:"",
+                        currentTotalPrice:0
 
                     }
                 },
                 mounted() {
-                    this.init()
+                    let date = new Date()
+                    this.month = date.getMonth() + 1;
+                    this.year = date.getFullYear();
+                    this.getDetail()
+                },
+                computed:{
+                    showTotal() {
+                        if(this.before && this.current) {
+                            return true
+                        } else if(this.before && this.water && this.electric) {
+                            return true
+                        } else {
+                            return false
+                        }
+                    }
                 },
                 methods: {
                     handleBack() {
                         window.history.back()
                     },
-                    async init() {
+                    async getDetail() {
+                        if(!this.year || !this.month) return
                         this.showLoading = true
                        //获取id
                         let params = JSON.parse(localStorage.getItem("params"))
-                        const res = await axios.post("/getRoomDetail",params)
+                        const res = await axios.post("/getRoomDetail",{
+                            year: this.year,
+                            month: this.month,
+                            id: params.id
+                        })
                         this.showLoading = false
-                        this.detail = res.data.detail
+                        this.current = res.data.current
                         this.before = res.data.before
-
-                        this.currentTotalPrice = this.detail.detail.totalPrice
+                        this.origin = res.data.origin
                     },
-                    handleCommit() {
-                        if(this.currentElectric && this.currentWater) {
+                    //写入最新的数据
+                    add() {
+                        if(this.electric && this.water) {
                             this.showLoading = true
                             let data = {
-                                year: this.before.detail.year,
-                                month: this.before.detail.month,
-                                electric: this.currentElectric,
-                                water: this.currentWater,
-                                roomId: this.before.detail.roomId
+                                year: this.year,
+                                month: this.month,
+                                electric: this.electric,
+                                water: this.water,
+                                roomId: this.origin.id,
+                                price: this.origin.price
                             }
-                            axios.post("/addDetail",data).then((res) => {
+                            axios.post("/saveDetail",data).then((res) => {
                                 this.showLoading = false
-                                alert("提交成功")
-                                window.location.href = "/"
+                                $('#myModal').modal('show')
+                                this.getDetail()
                             })
 
+                        }
+                    },
+                    //更改当前查询出来的数据
+                    update(){
+                        if(this.current.detail.electric && this.current.detail.water) {
+                            this.showLoading = true
+                            let data = {
+                                year: this.year,
+                                month: this.month,
+                                electric: this.current.detail.electric,
+                                water: this.current.detail.water,
+                                roomId: this.origin.id,
+                                price: this.origin.price
+                            }
+                            axios.post("/saveDetail",data).then((res) => {
+                                this.showLoading = false
+                                $('#myModal').modal('show')
+                                this.getDetail()
+                            })
+
+                        }
+                    },
+                    /**
+                     * 当上个月数据存在时执行
+                     */
+                    handleChange() {
+                        if(!this.before) return
+                        let beforeElectric = this.before.detail.electric - 0
+                        let beforeWater = this.before.detail.water - 0
+
+                        let electric = null
+                        let water = null
+                        if(this.current) {
+                            electric = this.current.detail.electric
+                            water = this.current.detail.water
+                        } else {
+                           electric = this.electric - 0
+                            water = this.water - 0
+                        }
+                        let price = this.origin.price - 0
+                        let electricPrice = (electric - beforeElectric) * 1.5
+                        let waterPrice = (water - beforeWater) * 4
+                        this.currentTotalPrice = price + electricPrice + waterPrice
+                    }
+                },
+                watch: {
+                    water() {
+                        this.handleChange()
+                    },
+                    electric() {
+                        this.handleChange()
+                    },
+                    origin:{
+                        deep: true,
+                        handler() {
+                            this.handleChange()
+                        }
+                    },
+                    current: {
+                        deep: true,
+                        handler() {
+                            this.handleChange()
                         }
                     }
                 }

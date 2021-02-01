@@ -10,11 +10,14 @@ import java.util.Map;
 
 @Service
 public interface RoomService {
-
-    JSONObject getList(Integer year, Integer month);
+    //获取所有房间
+    JSONObject getList();
 
     JSONObject getDetailById(Integer year,Integer month,Integer id);
 
     JSONObject addRomm(Map<String, String> map);
 
+    JSONObject getRoomDetail(Map<String, String> map);
+
+    JSONObject getOut(Map<String, String> map);
 }

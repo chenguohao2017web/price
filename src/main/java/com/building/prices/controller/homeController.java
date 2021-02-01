@@ -24,9 +24,7 @@ public class homeController {
 
     @PostMapping("/getList")
     @ResponseBody
-    public JSONObject getList(@RequestBody Map<String, String> map) {
-        Integer year = Integer.valueOf(map.get("year"));
-        Integer month = Integer.valueOf(map.get("month"));
-       return roomService.getList(year, month);
+    public JSONObject getList() {
+       return roomService.getList();
     }
 }

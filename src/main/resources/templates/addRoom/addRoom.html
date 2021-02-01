@@ -52,11 +52,11 @@
 
             <form class="form-inline">
                 <div class="form-group" >
-                    <label for="currentEle">起始电费</label>
+                    <label for="currentEle">入住用电</label>
                     <input type="text" v-model="currentElectric" class="form-control" id="currentEle">
                 </div>
                 <div class="form-group">
-                    <label for="currentWater">起始水费</label>
+                    <label for="currentWater">入住用水</label>
                     <input type="text" @keyup.13="handleCommit" v-model="currentWater" class="form-control" id="currentWater">
                 </div>
             </form>
@@ -69,6 +69,23 @@
 
         <div class="loading" v-if="showLoading">
             <div class="loading-text">请稍后..</div>
+        </div>
+
+        <div class="modal fade" id="tip" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">温馨提醒</h4>
+                    </div>
+                    <div class="modal-body">
+                        {{message}}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
         </div>
     </div>
 
@@ -84,13 +101,14 @@
                         currentElectric:"",
                         currentWater:"",
                         roomNum:"",
-                        price:""
+                        price:"",
+                        message:""
                     }
                 },
                 mounted() {
-                    let params = JSON.parse(localStorage.getItem("params"))
-                    this.year = params.year
-                    this.month = params.month
+                    let date = new Date()
+                    this.month = date.getMonth() + 1;
+                    this.year = date.getFullYear()
                 },
                 methods: {
                     handleBack() {
@@ -109,10 +127,14 @@
                         }).then(res => {
                             this.showLoading = false
                             if(res.data.result === 'fail') {
-                                alert("已存在房间号")
+                                this.message = "已存在房间号"
+                                $("#tip").modal("show")
                             }else {
-                                alert("新增成功")
-                                window.location.href = "/"
+                                this.message = "新增成功"
+                                $("#tip").modal("show")
+                                setTimeout(() => {
+                                    $("#tip").modal("hide")
+                                },1000)
                             }
                         })
                     }

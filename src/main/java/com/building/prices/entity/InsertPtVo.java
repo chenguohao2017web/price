@@ -4,15 +4,15 @@ import java.util.List;
 
 public class InsertPtVo {
 
-    private List<InsertVo> list;
+    private List<Room> list;
     private Integer year;
     private Integer month;
 
-    public List<InsertVo> getList() {
+    public List<Room> getList() {
         return list;
     }
 
-    public void setList(List<InsertVo> list) {
+    public void setList(List<Room> list) {
         this.list = list;
     }
 

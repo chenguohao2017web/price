@@ -11,6 +11,7 @@
         <result column="electric" property="electric"></result>
         <result column="month" property="month"></result>
         <result column="year" property="year"></result>
+        <result column="status" property="status"></result>
     </resultMap>
 
     <select id="getList" resultMap="roomMap" >
@@ -23,7 +24,7 @@
 
     <select id="getDetailByYearAndMonth" resultMap="roomMap" >
         select
-        d.total_price,d.electric, d.water, d.month, d.year, d.room_id
+        d.total_price,d.electric, d.water, d.month, d.year, d.room_id, d.status
          from detail d
          where d.year = #{year}
          and d.month = #{month}
@@ -31,8 +32,8 @@
     </select>
 
     <insert id="addDetail" parameterType="com.building.prices.entity.Detail">
-        insert into detail(room_id, electric, water, `year`, `month`, total_price)
-        values(#{roomId}, #{electric}, #{water}, #{year}, #{month}, #{totalPrice})
+        insert into detail(room_id, electric, water, `year`, `month`, total_price, status)
+        values(#{roomId}, #{electric}, #{water}, #{year}, #{month}, #{totalPrice}, #{status})
     </insert>
 
 
@@ -42,10 +43,15 @@
             <if test="electric != null">electric=#{electric},</if>
             <if test="water != null">water=#{water},</if>
             <if test="totalPrice != null">total_price=#{totalPrice},</if>
+            <if test="status != null">status=#{status},</if>
         </set>
         where room_id=#{roomId}
         and year = #{year}
         and month = #{month}
     </update>
+<!--    -->
+    <delete id="delByRoomId" parameterType="com.building.prices.entity.Detail">
+		delete from detail where room_id=#{roomId}
+	</delete>
 
 </mapper>

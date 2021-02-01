@@ -27,4 +27,9 @@ public interface RoomMapper {
 
     Room getRoomById(Integer id);
 
+    Room getRoomDetail(Map<String, String> map);
+
+    int delByRoomNum(String roomNum);
+
+    Room getRoomByRoomNum(String roomNum);
 }

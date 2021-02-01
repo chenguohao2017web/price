@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface DetailMapper {
@@ -14,7 +15,11 @@ public interface DetailMapper {
 
     boolean addDetail(Detail detail);
 
-    Detail getDetailByYearAndMonth(@Param("month")Integer month, @Param("year")Integer year, @Param("roomId")Integer roomId);
+    Detail getDetailByYearAndMonth(Map<String, String> map);
 
     boolean update(Detail updateDetail);
+
+    int saveDetail(Detail detail);
+
+    int delByRoomId(Integer roomId);
 }

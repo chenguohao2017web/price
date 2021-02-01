@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.Map;
 
 @Service
@@ -22,6 +23,44 @@ public class DetailServiceImpl implements DetailService {
     @Autowired
     private RoomMapper roomMapper;
 
+    /**
+     * 根据年月id 更新或者保存
+     * @param map
+     * @return
+     */
+    @Override
+    public JSONObject saveDetail(Map<String, String> map) {
+        JSONObject jsonObject = new JSONObject();
+
+        Room updateRoom = new Room();
+        updateRoom.setStartTime(new Date());
+        updateRoom.setPrice(Double.valueOf(map.get("price")));
+        updateRoom.setId(Integer.valueOf(map.get("roomId")));
+        //更新房租
+        roomMapper.update(updateRoom);
+
+        //根据年月id查询是否存在数据
+        Detail currentDetail = detailMapper.getDetailByYearAndMonth(map);
+        if(currentDetail != null) {
+            currentDetail.setElectric(Double.valueOf(map.get("electric")));
+            currentDetail.setWater(Double.valueOf(map.get("water")));
+            boolean result = detailMapper.update(currentDetail);
+            jsonObject.put("result", result);
+            return jsonObject;
+        } else {
+            //新增数据
+            Detail detail = new Detail();
+            detail.setRoomId(Integer.valueOf(map.get("roomId")));
+            detail.setWater(Double.valueOf(map.get("water")));
+            detail.setElectric(Double.valueOf(map.get("electric")));
+            detail.setYear(Integer.valueOf(map.get("year")));
+            detail.setMonth(Integer.valueOf(map.get("month")));
+            boolean result = detailMapper.addDetail(detail);
+            jsonObject.put("result", result);
+            return jsonObject;
+        }
+    }
+
     @Override
     public JSONObject addDetail(Map<String, String> map) {
         //获取年份
@@ -32,7 +71,7 @@ public class DetailServiceImpl implements DetailService {
         Integer roomId = Integer.valueOf(map.get("roomId"));
 
         //根据年份，月份获取上个月的detail对象
-        Detail beforeDetail = detailMapper.getDetailByYearAndMonth(month, year, roomId);
+        Detail beforeDetail = detailMapper.getDetailByYearAndMonth(map);
 
         if(month.equals(12)) {
             month = 1;
@@ -55,6 +94,8 @@ public class DetailServiceImpl implements DetailService {
         jsonObject.put("result", result);
         return jsonObject;
     }
+
+
 
     private Double calculateTotalPrice(Detail beforeDetail, Detail detail, Double price) {
         //计算差价

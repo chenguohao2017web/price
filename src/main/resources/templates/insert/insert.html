@@ -27,26 +27,26 @@
         <div class="form-inline">
             <div class="form-group">
                 <label for="yearInput">年份</label>
-                <input  type="text" v-model="year" class="form-control" id="yearInput" placeholder="年份" @keyup.13="init">
+                <input  type="text" v-model="year" class="form-control" id="yearInput" placeholder="年份">
             </div>
             <div class="form-group">
                 <label for="monthInput">月份</label>
-                <input  type="text" v-model="month" class="form-control" id="monthInput" placeholder="月份" @keyup.13="init">
+                <input  type="text" v-model="month" class="form-control" id="monthInput" placeholder="月份">
             </div>
-            <button class="btn btn-success" @click="init">刷新</button>
+            <button class="btn btn-success" @click="getList">刷新</button>
         </div>
 
         <ul class="list-group" style="margin-top:50px;">
-            <li v-for="item of list" :class="['list-group-item', {'list-group-item-success': item.electric && item.water}]">
-                <div style="text-align: center;font-size:20px;font-weight: bold">{{item.roomNum}}</div>
-                <form class="form-inline" style="text-align: center">
+            <li v-for="item of list" :class="['list-group-item', {'list-group-item-success': item.electric && item.water}]" style="display: flex;align-items: center">
+                <div style="text-align: center;font-size:20px;font-weight: bold;margin-right:10px;">{{item.roomNum}}</div>
+                <form class="form-inline" style="text-align: center;flex:1;">
                     <div class="form-group">
-                        <label for="exampleInputName2">电</label>
-                        <input type="text" v-model="item.electric" class="form-control" id="exampleInputName2" >
+                        <label for="exampleInputName2">用电</label>
+                        <input type="text" v-model="item.detail.electric" class="form-control" id="exampleInputName2" >
                     </div>
                     <div class="form-group">
-                        <label for="exampleInputEmail2">水</label>
-                        <input type="text" v-model="item.water" class="form-control" id="exampleInputEmail2">
+                        <label for="exampleInputEmail2">用水</label>
+                        <input type="text" v-model="item.detail.water" class="form-control" id="exampleInputEmail2">
                     </div>
                 </form>
             </li>
@@ -82,6 +82,23 @@
             无需插入数据
         </button>
 
+        <div class="modal fade" id="tip" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">温馨提醒</h4>
+                    </div>
+                    <div class="modal-body">
+                        操作成功
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+        </div>
+
 
     </div>
 
@@ -98,16 +115,16 @@
                     }
                 },
                 mounted() {
-                    let params = JSON.parse(localStorage.getItem("params"))
-                    this.year = params.year
-                    this.month = params.month
-                    this.init()
+                    let date = new Date()
+                    this.month = date.getMonth() + 1;
+                    this.year = date.getFullYear();
+                    this.getList()
                 },
                 methods: {
                     handleBack() {
                         window.history.back()
                     },
-                    async init() {
+                    async getList() {
                         if(!this.year || !this.month) return
                         const res = await axios.post("/getList",{
                             year: this.year,
@@ -115,30 +132,10 @@
                         })
 
                         let list = res.data.list
-                        let finishList = res.data.finishList
-
-                        //获取不需要注入的ids
-                        let ids = []
-                        if(finishList && finishList.length > 0 ) {
-                            finishList.forEach((item) => {
-                                ids.push(item.roomId)
-                            })
-                        }
-
-                        //筛选不需要进行计算的数组
-                        let calculateList = []
-                        if(ids.length > 0) {
-                            list.forEach((item) => {
-                                let id = item.id
-                                if(!ids.includes(id)) {
-                                    calculateList.push(item)
-                                }
-                            })
-                        } else {
-                            calculateList = list
-                        }
-                        console.log(calculateList)
-                        this.list = calculateList
+                        list.forEach((item) => {
+                            item.detail = {}
+                        })
+                        this.list = list
                     },
                     commit() {
                         this.showLoading = true
@@ -149,15 +146,18 @@
                         }
                         axios.post("/insertDetails",data).then(() => {
                             this.showLoading = false
-                            alert("操作成功")
-                            window.location.href = "/"
+                            $('#myModal').modal('toggle')
+                            $("#tip").modal("show");
+                            setTimeout(() => {
+                                window.location.href = "/"
+                            }, 2000)
                         })
 
                     },
                     openDialog() {
                         let canCommit = true
                         this.list.forEach((item) => {
-                            if(!item.electric || !item.water) {
+                            if(!item.detail.electric || !item.detail.water) {
                                 canCommit = false
                                 return
                             }

@@ -29,31 +29,75 @@ public class RoomServiceImpl implements RoomService {
     private DetailMapper detailMapper;
 
     /**
-     * 根据传入的年份和月份去统计当月需要进行房租计算
+     * 首页查询接口，查询所有用户
      * @param year
      * @param month
      * @return
      */
     @Override
-    public JSONObject getList(Integer year, Integer month) {
-
+    public JSONObject getList() {
         JSONObject jsonObject = new JSONObject();
-
-
-        //首先获取当前所有的用户列表 roomList
+        //查询该月中所有的用户
         List<Room> roomList = roomMapper.getRoomList();
+        jsonObject.put("list", roomList);
+        return jsonObject;
+    }
 
-        //查询该月中 detail的总条数 总而获取ids通过前端判断筛选
-        List<Detail> detailList = detailMapper.getList(year, month);
+    /**
+     * 根据用户id获取该房间详情
+     * @param map
+     * @return
+     */
+    @Override
+    public JSONObject getRoomDetail(Map<String, String> map) {
+        JSONObject jsonObject = new JSONObject();
+        //当前月的数据
+        Room currentRoom = roomMapper.getRoomDetail(map);
+        //上个月数据
+        Integer beforeYear = Integer.valueOf(map.get("year"));
+        Integer beforeMonth = Integer.valueOf(map.get("month"));
 
-        if(detailList.size() > 0) {
-            //如果找到了已经运算过，标记改字段
-            jsonObject.put("list", roomList);
-            jsonObject.put("finishList", detailList);
+        //根据id查询room对象
+        Room oriRoom = roomMapper.getRoomById(Integer.valueOf(map.get("id")));
+
+        //如果当前月份为1
+        if(beforeMonth.equals(1)) {
+            beforeMonth = 12;
+            beforeYear -=1;
+        } else {
+            beforeMonth -=1;
+        }
+        map.put("year", beforeYear.toString());
+        map.put("month", beforeMonth.toString());
+        Room beforeRoom = roomMapper.getRoomDetail(map);
+        jsonObject.put("before", beforeRoom);
+        jsonObject.put("current", currentRoom);
+        jsonObject.put("origin", oriRoom);
+        return jsonObject;
+    }
+
+
+    /**
+     * 退房逻辑
+     * @param map {roomNum}
+     * @return
+     */
+    @Override
+    public JSONObject getOut(Map<String, String> map) {
+        JSONObject jsonObject = new JSONObject();
+        String roomNum = map.get("roomNum");
+
+        //根据roomNum先查询是否存在该room对象数据，如果存在则移除
+        Room room = roomMapper.getRoomByRoomNum(roomNum);
+        if(room !=null) {
+            int result = roomMapper.delByRoomNum(roomNum);
+
+            //移除detail表对应该roomNum数据
+            int result2 = detailMapper.delByRoomId(room.getId());
+            jsonObject.put("result","succ");
             return jsonObject;
         } else {
-            //所有用户该月都没有进行过运算
-            jsonObject.put("list", roomList);
+            jsonObject.put("result","fail");
             return jsonObject;
         }
     }
@@ -125,5 +169,7 @@ public class RoomServiceImpl implements RoomService {
             return jsonObject;
         }
     }
+
+
 
 }

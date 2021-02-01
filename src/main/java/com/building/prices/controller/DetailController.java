@@ -30,10 +30,7 @@ public class DetailController {
     @PostMapping("/getRoomDetail")
     @ResponseBody
     public JSONObject getRoomDetail(@RequestBody Map<String, String> map) {
-        Integer id = Integer.valueOf(map.get("id"));
-        Integer year = Integer.valueOf(map.get("year"));
-        Integer month = Integer.valueOf(map.get("month"));
-        return roomService.getDetailById(year, month, id);
+        return roomService.getRoomDetail(map);
     }
 
     @PostMapping("/addDetail")

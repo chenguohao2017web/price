@@ -23,36 +23,73 @@
         </div>
 
         <div class="form-inline">
-            <div class="form-group">
-                <label for="yearInput">年份</label>
-                <input @keyup.13="getList" type="text" v-model="year" class="form-control" id="yearInput" placeholder="年份">
-            </div>
-            <div class="form-group">
-                <label for="monthInput">月份</label>
-                <input @keyup.13="getList" type="text" v-model="month" class="form-control" id="monthInput" placeholder="月份">
-            </div>
-            <button class="btn btn-success" @click="getList">查询</button>
+<!--            <div class="form-group">-->
+<!--                <label for="yearInput">年份</label>-->
+<!--                <input @keyup.13="getList" type="text" v-model="year" class="form-control" id="yearInput" placeholder="年份">-->
+<!--            </div>-->
+<!--            <div class="form-group">-->
+<!--                <label for="monthInput">月份</label>-->
+<!--                <input @keyup.13="getList" type="text" v-model="month" class="form-control" id="monthInput" placeholder="月份">-->
+<!--            </div>-->
             <button type="button" class="btn btn-success" @click="handerAdd">新增</button>
-            <button type="button" class="btn btn-success" @click="handerInsert">批量注入</button>
+            <button type="button" class="btn btn-success" @click="getOut">退房</button>
+            <button type="button" class="btn btn-success" @click="insertDatas">批量数据</button>
         </div>
 
         <ul class="list-group" style="margin-top:50px;">
-            <li v-for="item of list" :class="['list-group-item',{'list-group-item-danger' : !item.isFinish}, {'list-group-item-info' : item.isFinish}]"
+            <li v-for="item of list" :class="['list-group-item','list-group-item-info']"
                 style="font-size:16px;font-weight: bold;"
-                @click="handleClick(item)"
+                @click="handleItemClick(item)"
             >
                 {{item.roomNum}}
-                <span style="margin-left:10px;"
-                      v-if="item.totalPrice || item.totalPrice === 0"
-                >{{item.totalPrice === 0 ? '新增' :`总：${item.totalPrice}`}}</span>
-                <span style="margin-left:10px;">电:{{item.electric}}</span>
-                <span style="margin-left:10px;">水:{{item.water}}</span>
+<!--                <span style="margin-left:10px;">电:{{item.electric}}</span>-->
+<!--                <span style="margin-left:10px;">水:{{item.water}}</span>-->
             </li>
         </ul>
 
         <div class="loading" v-if="showLoading">
             <div class="loading-text">请稍后..</div>
         </div>
+
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">输入退房号</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form class="form-inline">
+                            <div class="form-group">
+                                <input type="text" v-model="getOutName" class="form-control" id="currentElc">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" @click="commitGetout">确认</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+
+        <div class="modal fade" id="tip" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">温馨提醒</h4>
+                    </div>
+                    <div class="modal-body">
+                        {{message}}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    </div>
+                </div><!-- /.modal-content -->
+            </div><!-- /.modal-dialog -->
+        </div>
+
     </div>
 
     <script>
@@ -61,93 +98,66 @@
                 el: '#app',
                 data(){
                     return {
-                        list:["test1","test2"],
-                        year: "",
-                        month: "",
-                        showLoading: false
+                        list:[],
+                        showLoading: false,
+                        getOutName:"",
+                        message:""
                     }
                 },
                 mounted() {
-                    this.init()
+                    this.getList()
                 },
                 methods: {
-                    init() {
-                        //获取记录
-
-                        if(localStorage.getItem("remember")) {
-                            let remember = JSON.parse(localStorage.getItem("remember"))
-                            this.year = remember.year
-                            this.month = remember.month
-                        } else {
-                            let d = new Date()
-                            this.year = d.getFullYear()
-                            this.month = d.getMonth() + 1
-                        }
-
-                        this.getList()
-
-                    },
                     async getList() {
-                        if(!this.year || !this.month) return
-
-                        let remember = {
-                            year: this.year,
-                            month: this.month
-                        }
-                        localStorage.setItem("remember", JSON.stringify(remember))
-
-
                         this.showLoading = true
-                        const res = await axios.post("/getList",{
-                            year: this.year,
-                            month: this.month
-                        })
+                        const res = await axios.post("/getList")
                         this.showLoading = false
-
-                        //判断是否存在已经进行缴费的
-
                         this.list = res.data.list
-                        let finishList = res.data.finishList
-                        if(!finishList) return
-                        let checkListId = []
-                        this.list.forEach((item, idx) => {
-                            finishList.forEach((finishItem) => {
-                                let id = finishItem.roomId
-                                if(id === item.id) {
-                                    item.isFinish = true
-                                    item.totalPrice = finishItem.totalPrice
-                                    item.water = finishItem.water
-                                    item.electric = finishItem.electric
-                                    this.$set(this.list, idx, item)
-                                }
-                            })
-                        })
                     },
-                    handleClick(item) {
-                        if(item.totalPrice === 0) return
-                        let params = {
-                            id: item.id,
-                            year: this.year,
-                            month: this.month
-                        }
-                        localStorage.setItem("params", JSON.stringify(params))
+                    /**
+                     * 点击项目跳转到详情页
+                     * @param item
+                     */
+                    handleItemClick(item) {
+                        localStorage.setItem("params", JSON.stringify(item))
                         window.location.href = "/detail"
                     },
-                    handerInsert() {
-                        let params = {
-                            year: this.year,
-                            month: this.month
-                        }
-                        localStorage.setItem("params", JSON.stringify(params))
+                    /**
+                     * 批量插入数据
+                     * @param item
+                     */
+                    insertDatas() {
                         window.location.href = "/insert"
                     },
+                    /**
+                     * 新增房间号
+                     */
                     handerAdd() {
-                        let params = {
-                            year: this.year,
-                            month: this.month
-                        }
-                        localStorage.setItem("params", JSON.stringify(params))
                         window.location.href = "/addRoom"
+                    },
+                    /**
+                     * 退房
+                     */
+                    getOut() {
+                        $('#myModal').modal('show')
+                    },
+                    commitGetout(){
+                        if(!this.getOutName) return
+                        axios.post("/getout",{
+                            roomNum: this.getOutName
+                        }).then(res => {
+                            $('#myModal').modal('hide')
+                            let result = res.data.result
+                            if(result === "fail") {
+                                //没有查询到房间号
+                                this.message = "没有查询到这个房间号"
+                                $('#tip').modal('show')
+                            } else {
+                                this.message = "退房成功"
+                                $('#tip').modal('show')
+                                this.getList()
+                            }
+                        })
                     }
 
                 }

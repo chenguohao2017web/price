@@ -11,4 +11,6 @@ public interface DetailService {
 
     JSONObject addDetail(Map<String, String> map);
 
+    //保存数据
+    JSONObject saveDetail(Map<String, String> map);
 }

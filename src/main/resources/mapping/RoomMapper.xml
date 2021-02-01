@@ -17,6 +17,7 @@
             <result column="electric" property="electric"></result>
             <result column="month" property="month"></result>
             <result column="year" property="year"></result>
+            <result column="status" property="status"></result>
         </association>
 
     </resultMap>
@@ -25,9 +26,8 @@
         select r.id, r.room_num, r.price, r.start_time,
         d.total_price,d.electric, d.water, d.month, d.year, d.room_id
          from room r
-         inner join detail d
-         where r.id=d.room_id
-         and d.year = #{year}
+         left join detail d on r.id=d.room_id
+         where d.year = #{year}
          and d.month = #{month}
     </select>
 
@@ -42,15 +42,13 @@
     <select id="getDetailById" resultMap="roomMap" >
         select r.id, r.room_num, r.price, r.start_time,
         d.total_price,d.electric, d.water, d.month, d.year, d.room_id
-         from room r
-         inner join detail d
-         where r.id=d.room_id
-         and d.year = #{year}
+         from room r left join detail d on r.id=d.room_id
+         where d.year = #{year}
          and d.month = #{month}
          and r.id = #{id}
     </select>
 
-<!--    根据roomNum查找room对象-->
+<!--    根据年月roomNum查找room对象-->
     <select id="findRoomByRoomNum" resultMap="roomMap" >
         select r.id, r.room_num, r.price, r.start_time,d.total_price,d.electric, d.water
          from room r
@@ -58,6 +56,13 @@
          where r.room_num = #{roomNum}
          and d.year = #{year}
          and d.month = #{month}
+    </select>
+
+<!--    根据roomNum查询room findRoomByRoomNum-->
+    <select id="getRoomByRoomNum" resultMap="roomMap" >
+        select r.id, r.room_num, r.price, r.start_time
+         from room r
+         where r.room_num = #{roomNum}
     </select>
 
 <!--    获取所有用户列表-->
@@ -97,6 +102,18 @@
         where id=#{id}
     </update>
 
+<!--    根据年月id用户查询详情-->
+    <select id="getRoomDetail" resultMap="roomMap" >
+        select r.id, r.room_num, r.price, r.start_time,
+        d.total_price,d.electric, d.water, d.month, d.year, d.room_id,d.status
+         from room r left join detail d on r.id=d.room_id
+         where d.year = #{year}
+         and d.month = #{month}
+         and r.id = #{id}
+    </select>
 
+    <delete id="delByRoomNum" parameterType="com.building.prices.entity.Room">
+		delete from room where room_num=#{roomNum}
+	</delete>
 
 </mapper>
