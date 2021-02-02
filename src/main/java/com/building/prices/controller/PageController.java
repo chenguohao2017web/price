@@ -9,6 +9,6 @@ public class PageController {
 
     @GetMapping("/addRoom")
     public String addRoom() {
-        return "/addRoom/addRoom";
+        return "addRoom/addRoom";
     }
 }

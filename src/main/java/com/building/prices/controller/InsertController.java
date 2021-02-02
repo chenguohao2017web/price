@@ -20,7 +20,7 @@ public class InsertController {
 
     @GetMapping("/insert")
     public String insert() {
-        return "/insert/insert";
+        return "insert/insert";
     }
 
     @PostMapping("/insertDetails")

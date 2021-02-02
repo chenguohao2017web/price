@@ -24,7 +24,7 @@ public class DetailController {
 
     @GetMapping("/detail")
     public String toDetail() {
-        return "/detail/detail";
+        return "detail/detail";
     }
 
     @PostMapping("/getRoomDetail")
