@@ -17,33 +17,21 @@
 </head>
 <body>
     <div id="app" class="container-fluid">
-
-        <div class="page-header">
-            <h4>列表</h4>
+        <div class="btn-menu" style="position:absolute;height:50px;bottom:0;left:0;display: flex;width: 100%;">
+            <button type="button" class="btn btn-success flex-btn" @click="handerAdd">入住</button>
+            <button type="button" class="btn btn-success flex-btn" @click="getOut">退房</button>
+            <button type="button" class="btn btn-success flex-btn" @click="insertDatas">批量数据</button>
         </div>
 
-        <div class="form-inline">
-<!--            <div class="form-group">-->
-<!--                <label for="yearInput">年份</label>-->
-<!--                <input @keyup.13="getList" type="text" v-model="year" class="form-control" id="yearInput" placeholder="年份">-->
-<!--            </div>-->
-<!--            <div class="form-group">-->
-<!--                <label for="monthInput">月份</label>-->
-<!--                <input @keyup.13="getList" type="text" v-model="month" class="form-control" id="monthInput" placeholder="月份">-->
-<!--            </div>-->
-            <button type="button" class="btn btn-success" @click="handerAdd">新增</button>
-            <button type="button" class="btn btn-success" @click="getOut">退房</button>
-            <button type="button" class="btn btn-success" @click="insertDatas">批量数据</button>
-        </div>
-
-        <ul class="list-group" style="margin-top:50px;">
-            <li v-for="item of list" :class="['list-group-item','list-group-item-info']"
-                style="font-size:16px;font-weight: bold;"
+        <ul class="list-group">
+            <li v-for="item of list" :class="['list-group-item','active']"
+                style="font-size:16px;font-weight: bold;margin-bottom:5px;"
                 @click="handleItemClick(item)"
             >
-                {{item.roomNum}}
-<!--                <span style="margin-left:10px;">电:{{item.electric}}</span>-->
-<!--                <span style="margin-left:10px;">水:{{item.water}}</span>-->
+                <div class="box" style="position:relative;width: 100%;height:100%;">
+                    {{item.roomNum}}
+                    <button type="button" class="btn btn-danger" style="position:absolute;top:-6px;right:0;" @click.stop="getOut(item)">退房</button>
+                </div>
             </li>
         </ul>
 
@@ -56,7 +44,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <h4 class="modal-title">输入退房号</h4>
+                        <h4 class="modal-title">确认退房？</h4>
                     </div>
                     <div class="modal-body">
                         <form class="form-inline">
@@ -106,8 +94,15 @@
                 },
                 mounted() {
                     this.getList()
+                    this.initBg()
                 },
                 methods: {
+                    initBg() {
+                        let el = $("#app")
+                        setInterval(() => {
+
+                        }, 50)
+                    },
                     async getList() {
                         this.showLoading = true
                         const res = await axios.post("/getList")
@@ -138,7 +133,8 @@
                     /**
                      * 退房
                      */
-                    getOut() {
+                    getOut(item) {
+                        this.getOutName = item.roomNum
                         $('#myModal').modal('show')
                     },
                     commitGetout(){

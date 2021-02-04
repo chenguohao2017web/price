@@ -18,13 +18,9 @@
 <body>
     <div id="app" class="container-fluid" style="position: relative">
 
-        <button @click="handleBack" type="button" class="btn btn-primary" style="position: absolute;top:10px;right:10px;">返回</button>
-        <div class="page-header">
-            <h4>新增数据</h4>
-        </div>
+        <button @click="handleBack" type="button" class="btn btn-danger" style="position: absolute;top:10px;left:10px;">返回</button>
 
-
-        <div>
+        <div style="margin-top:50px;">
             <div class="form-inline">
                 <div class="form-group">
                     <label for="yearInput">年份</label>
@@ -64,7 +60,7 @@
             <div style="height:10px"></div>
 
 
-            <button  type="button" class="btn btn-primary" @click="handleCommit">提交</button>
+            <button  type="button" class="btn btn-success btn-lg btn-block" @click="handleCommit">确认入住</button>
         </div>
 
         <div class="loading" v-if="showLoading">
