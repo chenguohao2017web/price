@@ -17,7 +17,7 @@
 </head>
 <body>
     <div id="app" class="container-fluid">
-        <div class="btn-menu" style="position:absolute;height:50px;bottom:0;left:0;display: flex;width: 100%;">
+        <div class="btn-menu" style="position:fixed;z-index:99;height:50px;bottom:0;left:0;display: flex;width: 100%;">
             <button type="button" class="btn btn-success flex-btn" @click="handerAdd">入住</button>
             <button type="button" class="btn btn-success flex-btn" @click="getOut">退房</button>
             <button type="button" class="btn btn-success flex-btn" @click="insertDatas">批量数据</button>
@@ -107,7 +107,25 @@
                         this.showLoading = true
                         const res = await axios.post("/getList")
                         this.showLoading = false
-                        this.list = res.data.list
+                        let list = res.data.list
+                        let list1 = []
+                        let list2 = []
+                        list.forEach(item => {
+                            let roomNum = item.roomNum
+                            let arr = roomNum.split(" ")
+                            if(arr[0].indexOf("88") != -1) {
+                                list1.push(item)
+                            }else {
+                                list2.push(item)
+                            }
+                        })
+                        list1 = list1.sort((v1, v2) => {
+                            return v1.roomNum.split(" ")[1] - v2.roomNum.split(" ")[1]
+                        })
+                        list2 = list2.sort((v1, v2) => {
+                            return v1.roomNum.split(" ")[1] - v2.roomNum.split(" ")[1]
+                        })
+                        this.list = list1.concat(list2)
                     },
                     /**
                      * 点击项目跳转到详情页
